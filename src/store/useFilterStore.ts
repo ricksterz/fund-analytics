@@ -17,6 +17,7 @@ interface FilterStore extends FilterState {
   boundsInitialized: boolean;
   initBounds: (funds: Fund[]) => void;
   setMethodology: (m: Methodology) => void;
+  togglePME: () => void;
   setBenchmarkReturn: (r: number) => void;
   setSearch: (s: string) => void;
   toggleFund: (id: string) => void;
@@ -36,6 +37,7 @@ interface FilterStore extends FilterState {
 
 const DEFAULTS: FilterState = {
   methodology: "takahashi-alexander",
+  showPME: true,
   benchmarkReturn: 0.1,
   search: "",
   fundIds: [],
@@ -102,6 +104,7 @@ export const useFilterStore = create<FilterStore>((set, get) => ({
     });
   },
   setMethodology: (methodology) => set({ methodology }),
+  togglePME: () => set((s) => ({ showPME: !s.showPME })),
   setBenchmarkReturn: (benchmarkReturn) => set({ benchmarkReturn }),
   setSearch: (search) => set({ search }),
   toggleFund: (id) =>

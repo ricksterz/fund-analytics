@@ -109,6 +109,7 @@ export interface PMEResult {
 
 export interface FilterState {
   methodology: Methodology;
+  showPME: boolean;
   benchmarkReturn: number;
   search: string;
   fundIds: string[];

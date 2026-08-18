@@ -18,13 +18,15 @@ const DESCRIPTIONS: Record<Methodology, string> = {
 export function MethodologySelector() {
   const methodology = useFilterStore((s) => s.methodology);
   const setMethodology = useFilterStore((s) => s.setMethodology);
+  const showPME = useFilterStore((s) => s.showPME);
+  const togglePME = useFilterStore((s) => s.togglePME);
 
   return (
     <div className="w-full">
       <div className="flex items-center gap-2 mb-2">
         <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wide">Methodology</h2>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
         {METHODOLOGIES.map((m) => (
           <button
             key={m.id}
@@ -47,6 +49,29 @@ export function MethodologySelector() {
             <div className="mt-1 text-xs text-neutral-500 leading-snug">{DESCRIPTIONS[m.id]}</div>
           </button>
         ))}
+
+        <button
+          onClick={togglePME}
+          className={clsx(
+            "text-left rounded-lg border p-3 transition-colors",
+            showPME
+              ? "border-amber-400 bg-amber-400/10 ring-1 ring-amber-400/40"
+              : "border-neutral-800 bg-neutral-900 hover:border-neutral-700"
+          )}
+        >
+          <div className="flex items-center gap-1.5">
+            <div className={clsx("text-sm font-semibold", showPME ? "text-amber-300" : "text-neutral-200")}>
+              PME / Direct Alpha
+            </div>
+            <span className="text-[9px] uppercase tracking-wide rounded-full border border-neutral-700 px-1.5 py-0.5 text-neutral-500">
+              overlay
+            </span>
+          </div>
+          <div className="mt-1 text-xs text-neutral-500 leading-snug">
+            Not a cash-flow model like the four to the left — benchmarks whichever methodology is selected against a
+            public market index. Click to show/hide.
+          </div>
+        </button>
       </div>
     </div>
   );

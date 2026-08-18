@@ -123,14 +123,14 @@ export default function Home() {
 
             <MethodologySelector />
 
+            {filters.showPME && <RelativePerformance pme={pme} />}
+
             <div>
               <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wide mb-2">
                 Portfolio Summary — {methodologyLabel}
               </h2>
               <MetricsGrid metrics={projection.metrics} />
             </div>
-
-            <RelativePerformance pme={pme} />
 
             <FilterBar />
 
