@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone browser-console script, not part of the app build.
+    "scripts/formd_browser_extractor.js",
   ]),
 ]);
 

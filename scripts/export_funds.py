@@ -1,33 +1,42 @@
-"""Export pooled-fund Form D offerings from the Open Disclosure advisorapp
-DuckDB into a compact JSON dataset for the fund analytics app.
+"""Export pooled-fund Form D offerings into a compact JSON dataset for the
+fund analytics app, combining two sources:
 
-Source: ~/dev/advisorapp/data/advisor.duckdb, table form_d_offerings
-(etl/form_d.py in that repo). Form D reports issuer-side exempt-offering
-filings (SEC quarterly structured data sets) -- it has NO capital-call,
-distribution, or NAV history. What it DOES give us, per offering:
-  - issuer_name, investment_fund_type, entity_type, issuer_state
-  - filing_date, submission_type (D / D/A), previous_accession_number
-  - total_offering_amount (target raise, 35% coverage; often "indefinite")
-  - total_amount_sold (cumulative amount actually raised, 100% coverage)
+  1. 2025-2026 (6 quarters): ~/dev/advisorapp/data/advisor.duckdb, table
+     form_d_offerings (etl/form_d.py in that repo) -- walks amendment
+     chains (previous_accession_number) to each offering's root filing and
+     most recent state, so committed capital reflects the latest known
+     amendment.
+  2. 2020-2024 (20 quarters): scripts/formd_history/*.json, produced by
+     fetching SEC's Form D quarterly zips directly in a real browser (see
+     scripts/formd_browser_extractor.js) and parsing them client-side --
+     www.sec.gov sits behind an Akamai WAF that 403s automated clients
+     (curl, requests) even with a spoofed browser User-Agent, so a real
+     browser session is the only way to reach these files programmatically.
+     These rows are ORIGINAL ("D", not "D/A") filings only -- no amendment
+     chain resolution across quarters -- so committed capital here reflects
+     the amount at the fund's initial filing, not any later amendment.
 
-This script:
-  1. Loads pooled-fund offerings (is_pooled_fund = true).
-  2. Walks amendment chains (previous_accession_number) to find each
-     offering's root filing and its most recent state.
-  3. Derives: vintage_year (root filing year), committed_capital (target
-     offering amount when plausible, else amount raised to date),
-     manager (heuristic strip of fund-designator suffixes from issuer_name).
-  4. Cleans obvious "indefinite offering" placeholder amounts (offering
-     amount wildly larger than amount sold).
-  5. Writes public/data/funds.json -- fund identity/economics only.
-     All capital-call/distribution/NAV projections are computed client-side
-     by the modeling engine (lib/model/*), NOT sourced from filings, since
-     no such data exists in Form D or ADV Schedule D.
+Form D reports issuer-side exempt-offering filings only -- it has NO
+capital-call, distribution, or NAV history. What it DOES give us, per
+offering: issuer_name, investment_fund_type, entity_type, issuer_state,
+filing_date, total_offering_amount (target raise, often "indefinite") and
+total_amount_sold (cumulative amount actually raised).
+
+Both sources are cleaned the same way: obvious "indefinite offering"
+placeholder amounts are dropped (offering amount wildly larger than amount
+sold), and manager is a heuristic strip of fund-designator suffixes from
+issuer_name.
+
+Writes public/data/funds.json -- fund identity/economics only. All
+capital-call/distribution/NAV projections are computed client-side by the
+modeling engine (lib/model/*), NOT sourced from filings, since no such data
+exists in Form D or ADV Schedule D.
 """
 
 import json
 import math
 import re
+from collections import Counter
 from pathlib import Path
 
 import duckdb
@@ -94,7 +103,26 @@ def clean_committed_capital(offering_amt, sold_amt):
     return None, None
 
 
-def main() -> None:
+HISTORY_DIR = Path(__file__).resolve().parent / "formd_history"
+
+# The browser-side extractor met two different FILING_DATE formats across
+# quarters ("2020-03-31 17:30:14" and "01-OCT-2020") -- SEC's own export
+# format apparently changed at some point within 2020-2024.
+_DATE_FORMATS = ["%Y-%m-%d %H:%M:%S", "%d-%b-%Y", "%Y-%m-%d"]
+
+
+def _parse_filing_date(raw: str):
+    from datetime import datetime
+
+    for fmt in _DATE_FORMATS:
+        try:
+            return datetime.strptime(raw, fmt).date()
+        except ValueError:
+            continue
+    raise ValueError(f"unrecognized filing date format: {raw!r}")
+
+
+def load_duckdb_funds() -> list[dict]:
     con = duckdb.connect(str(ADVISORAPP_DB), read_only=True)
 
     rows = con.execute(
@@ -171,15 +199,74 @@ def main() -> None:
             }
         )
 
+    return funds
+
+
+def load_historical_funds() -> list[dict]:
+    """Load the browser-extracted 2020-2024 original-filing rows from
+    scripts/formd_history/*.json. Row shape (positional, see
+    scripts/formd_browser_extractor.js): [accession_number, filing_date_raw,
+    fund_type, committed_capital, capital_basis(0=target,1=raised_to_date),
+    min_investment, issuer_name, issuer_state, entity_type]. Committed-
+    capital cleaning and the $100K-$50B sanity bounds were already applied
+    client-side with the same constants as clean_committed_capital above."""
+    if not HISTORY_DIR.exists():
+        return []
+
+    funds = []
+    for path in sorted(HISTORY_DIR.glob("*.json")):
+        batch = json.loads(path.read_text())
+        for quarter, rows in batch.items():
+            for row in rows:
+                (
+                    accession_number,
+                    filing_date_raw,
+                    fund_type,
+                    committed_capital,
+                    capital_basis_code,
+                    min_investment,
+                    issuer_name,
+                    issuer_state,
+                    entity_type,
+                ) = row
+                if not issuer_name:
+                    continue
+                filing_date = _parse_filing_date(filing_date_raw)
+                funds.append(
+                    {
+                        "id": accession_number,
+                        "name": issuer_name.strip(),
+                        "manager": derive_manager(issuer_name),
+                        "fundType": fund_type or "Other Investment Fund",
+                        "vintageYear": filing_date.year,
+                        "committedCapital": round(committed_capital, 2),
+                        "capitalBasis": "target" if capital_basis_code == 0 else "raised_to_date",
+                        "minInvestment": round(min_investment, 2) if min_investment else None,
+                        "state": issuer_state or None,
+                        "structure": entity_type or "Other",
+                        "hasNonAccredited": None,
+                        "filingCount": 1,
+                        "lastFilingDate": filing_date.isoformat(),
+                        "firstFilingDate": filing_date.isoformat(),
+                    }
+                )
+    return funds
+
+
+def main() -> None:
+    recent = load_duckdb_funds()
+    historical = load_historical_funds()
+
+    seen_ids = {f["id"] for f in recent}
+    historical = [f for f in historical if f["id"] not in seen_ids]
+
+    funds = recent + historical
     funds.sort(key=lambda f: f["committedCapital"], reverse=True)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(funds, separators=(",", ":")))
 
-    print(f"Wrote {len(funds)} funds to {OUT_PATH}")
-    print(f"  by fundType: ", {})
-    from collections import Counter
-
+    print(f"Wrote {len(funds)} funds to {OUT_PATH} ({len(recent)} recent + {len(historical)} historical)")
     print("  fundType counts:", Counter(f["fundType"] for f in funds))
     print("  vintageYear counts:", dict(sorted(Counter(f["vintageYear"] for f in funds).items())))
     print(

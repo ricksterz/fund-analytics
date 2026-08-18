@@ -9,10 +9,22 @@ methodologies.
 ## What's real vs. modeled
 
 **Real, sourced from filings:** fund name, manager, fund type, vintage year,
-committed capital, entity structure, and domicile — pulled from 37,425 SEC
-Form D pooled-fund offerings (Jan 2025 – Jun 2026 filing window) via
-[`scripts/export_funds.py`](scripts/export_funds.py), which dedupes
-amendment chains and cleans "indefinite offering" placeholder amounts.
+committed capital, entity structure, and domicile — pulled from 95,503 SEC
+Form D pooled-fund offerings, vintages 2020–2026, via
+[`scripts/export_funds.py`](scripts/export_funds.py) from two sources:
+
+- **2025–2026** — the Open Disclosure app's DuckDB pipeline, which resolves
+  each fund's amendment chain to its latest known filing state.
+- **2020–2024** — backfilled directly from SEC's quarterly Form D archives.
+  `www.sec.gov` sits behind an Akamai WAF that 403s automated clients (curl,
+  requests) even with a spoofed browser User-Agent, so this required
+  fetching and parsing each quarterly zip *inside a real browser session*
+  (see [`scripts/formd_browser_extractor.js`](scripts/formd_browser_extractor.js),
+  cached per-quarter in [`scripts/formd_history/`](scripts/formd_history))
+  rather than the usual scripted download. These vintages use each fund's
+  original filing only (no cross-quarter amendment-chain resolution), and
+  "indefinite offering" placeholder amounts are cleaned the same way as the
+  2025–2026 source.
 
 **Modeled, not historical:** Form D reports issuer-side offering amounts
 only — it has no capital-call, distribution, or NAV history for any fund.
@@ -38,15 +50,20 @@ Every methodology produces a P10–P90 outcome band, not just a single line
 
 ## Refreshing the data
 
-`public/data/funds.json` is a point-in-time export. To refresh it against a
-newer local copy of the Open Disclosure DuckDB:
+`public/data/funds.json` is a point-in-time export, combining the 2025–2026
+DuckDB pull with the cached 2020–2024 backfill in `scripts/formd_history/`:
 
 ```bash
 python3 scripts/export_funds.py
 ```
 
 Requires `duckdb` (available in `~/dev/advisorapp/.venv`) and read access to
-`~/dev/advisorapp/data/advisor.duckdb`.
+`~/dev/advisorapp/data/advisor.duckdb`. To pull additional quarters (new
+recent ones, or further back than 2020), open a real browser tab on any
+`sec.gov` page, paste in `scripts/formd_browser_extractor.js`, and run
+`await extractQuarter('<zip url from the Form D Data Sets page>')` — save
+the result to a new file under `scripts/formd_history/` and re-run the
+export.
 
 ## Development
 
