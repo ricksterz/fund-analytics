@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFunds } from "@/lib/useFunds";
 import { useFilterStore, filterFunds } from "@/store/useFilterStore";
-import { buildProjection } from "@/lib/model";
+import { buildProjection, computePME } from "@/lib/model";
 import { filtersToSearchParams, searchParamsToFilters } from "@/lib/urlState";
 import { MethodologySelector } from "@/components/MethodologySelector";
 import { MetricsGrid } from "@/components/MetricsGrid";
@@ -12,6 +12,7 @@ import { JCurveChart } from "@/components/JCurveChart";
 import { CashFlowTable } from "@/components/CashFlowTable";
 import { FundExplorer } from "@/components/FundExplorer";
 import { ShareButton } from "@/components/ShareButton";
+import { RelativePerformance } from "@/components/RelativePerformance";
 import { Disclosure } from "@/components/Disclosure";
 import { METHODOLOGIES } from "@/lib/types";
 import { formatCurrencyCompact } from "@/lib/format";
@@ -56,6 +57,10 @@ export default function Home() {
   const selectedFunds = useMemo(
     () => (filters.fundIds.length ? funds.filter((f) => filters.fundIds.includes(f.id)) : []),
     [funds, filters.fundIds]
+  );
+  const pme = useMemo(
+    () => computePME(filtered, filters.methodology, filters.benchmarkReturn),
+    [filtered, filters.methodology, filters.benchmarkReturn]
   );
 
   const methodologyLabel = METHODOLOGIES.find((m) => m.id === filters.methodology)?.label;
@@ -124,6 +129,8 @@ export default function Home() {
               </h2>
               <MetricsGrid metrics={projection.metrics} />
             </div>
+
+            <RelativePerformance pme={pme} />
 
             <FilterBar />
 

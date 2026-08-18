@@ -31,6 +31,7 @@ function decodeRange(str: string | null): [number, number] | null {
 export function filtersToSearchParams(filters: FilterState): URLSearchParams {
   const p = new URLSearchParams();
   if (filters.methodology !== "takahashi-alexander") p.set("m", filters.methodology);
+  if (filters.benchmarkReturn !== 0.1) p.set("br", String(filters.benchmarkReturn));
   if (filters.search) p.set("q", filters.search);
   if (filters.fundIds.length) p.set("f", encodeList(filters.fundIds));
   if (filters.managers.length) p.set("mgr", encodeList(filters.managers));
@@ -48,6 +49,12 @@ export function searchParamsToFilters(params: URLSearchParams): Partial<FilterSt
 
   const m = params.get("m");
   if (m && (METHODOLOGY_VALUES as string[]).includes(m)) partial.methodology = m as Methodology;
+
+  const br = params.get("br");
+  if (br) {
+    const v = Number(br);
+    if (Number.isFinite(v)) partial.benchmarkReturn = v;
+  }
 
   const q = params.get("q");
   if (q) partial.search = q;

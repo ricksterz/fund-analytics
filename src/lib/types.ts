@@ -29,8 +29,8 @@ export type Methodology =
 
 export const METHODOLOGIES: { id: Methodology; label: string; short: string }[] = [
   { id: "takahashi-alexander", label: "Takahashi–Alexander", short: "T-A" },
-  { id: "empirical-benchmark", label: "Empirical Benchmarking", short: "Benchmark" },
   { id: "monte-carlo", label: "Stochastic / Monte Carlo", short: "Monte Carlo" },
+  { id: "empirical-benchmark", label: "Empirical Benchmarking", short: "Benchmark" },
   { id: "marshall-lerner", label: "Marshall–Lerner Trade Model", short: "M-L" },
 ];
 
@@ -95,8 +95,21 @@ export interface Projection {
   simulations: number;
 }
 
+/** Kaplan-Schoar Public Market Equivalent + Direct Alpha, benchmarking the
+ * modeled cash flows against a public market index growing at a constant
+ * annual rate. */
+export interface PMEResult {
+  ksPme: number;
+  directAlpha: number | null;
+  benchmarkReturn: number;
+  fvContributions: number;
+  fvDistributions: number;
+  navToDate: number;
+}
+
 export interface FilterState {
   methodology: Methodology;
+  benchmarkReturn: number;
   search: string;
   fundIds: string[];
   managers: string[];

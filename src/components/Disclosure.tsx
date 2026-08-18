@@ -35,7 +35,13 @@ export function Disclosure() {
           assumptions and simulated randomness; actual fund cash flows, NAV, and returns will differ, often
           materially, from any figure shown here. Past or projected performance is not indicative of future results.
         </p>
-        <p className="lg:col-span-2 text-neutral-700">
+        <p>
+          <strong className="text-neutral-500">PME / Direct Alpha.</strong> The Public Market Equivalent and Direct
+          Alpha figures benchmark modeled cash flows against a hypothetical index compounding at a constant,
+          user-set annual rate — not a real historical index feed (e.g. actual S&amp;P 500 daily returns). Treat
+          them as an illustration of the comparison method, not a live benchmark.
+        </p>
+        <p className="text-neutral-700">
           Not affiliated with, endorsed by, or a service of the U.S. Securities and Exchange Commission. Fund names
           and manager names are drawn from public regulatory filings and are shown for identification purposes only.
         </p>
