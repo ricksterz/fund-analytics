@@ -31,7 +31,7 @@ export function ShareButton({ selectedFunds }: { selectedFunds: Fund[] }) {
   const handleShare = async () => {
     const url = buildUrl();
     const title =
-      selectedFunds.length === 1 ? `${selectedFunds[0].name} — J-Curve Analysis` : "Fund J-Curve Analytics";
+      selectedFunds.length === 1 ? `${selectedFunds[0].name} — J-Curve Analysis` : "Vantage Curve";
 
     if (typeof navigator !== "undefined" && "share" in navigator) {
       try {

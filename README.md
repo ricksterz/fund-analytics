@@ -1,4 +1,6 @@
-# Fund J-Curve Analytics
+# Vantage Curve
+
+*Every vintage. Every curve. One vantage point.*
 
 A private-fund J-curve analytics dashboard built on real fund identity data
 from the SEC Form D pipeline (the same pipeline behind the

@@ -70,10 +70,12 @@ export default function Home() {
       <header className="border-b border-neutral-800 bg-neutral-950 sticky top-0 z-30">
         <div className="mx-auto max-w-[1400px] px-4 py-3 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">Fund J-Curve Analytics</h1>
+            <h1 className="text-lg font-semibold tracking-tight">
+              Vantage Curve
+            </h1>
             <p className="text-xs text-neutral-500">
-              Real fund identity from the SEC Form D pipeline · modeled capital-call, distribution &amp; NAV
-              projections
+              Every vintage. Every curve. One vantage point. · Real fund identity from the SEC Form D pipeline,
+              modeled capital-call &amp; NAV projections
             </p>
           </div>
           <div className="flex items-center gap-3">

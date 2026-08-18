@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fund J-Curve Analytics",
+  title: "Vantage Curve",
   description:
-    "Private fund J-curve analytics built on real SEC Form D fund data, with Takahashi-Alexander, empirical benchmarking, Monte Carlo, and Marshall-Lerner cash-flow projections.",
+    "Every vintage. Every curve. One vantage point. Private fund J-curve analytics built on real SEC Form D fund data, with Takahashi-Alexander, empirical benchmarking, Monte Carlo, and Marshall-Lerner cash-flow projections.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
