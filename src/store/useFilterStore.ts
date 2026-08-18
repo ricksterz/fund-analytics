@@ -28,6 +28,8 @@ interface FilterStore extends FilterState {
   setTermRange: (min: number, max: number) => void;
   toggleStructure: (s: string) => void;
   toggleState: (s: string) => void;
+  setFundIds: (ids: string[]) => void;
+  hydrate: (partial: Partial<FilterState>) => void;
   reset: () => void;
 }
 
@@ -124,6 +126,8 @@ export const useFilterStore = create<FilterStore>((set, get) => ({
     set((s) => ({
       states: s.states.includes(s2) ? s.states.filter((x) => x !== s2) : [...s.states, s2],
     })),
+  setFundIds: (fundIds) => set({ fundIds }),
+  hydrate: (partial) => set(partial),
   reset: () =>
     set((s) => ({
       ...DEFAULTS,

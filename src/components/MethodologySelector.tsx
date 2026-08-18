@@ -22,7 +22,7 @@ export function MethodologySelector() {
   return (
     <div className="w-full">
       <div className="flex items-center gap-2 mb-2">
-        <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wide">1. Methodology</h2>
+        <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wide">Methodology</h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         {METHODOLOGIES.map((m) => (
