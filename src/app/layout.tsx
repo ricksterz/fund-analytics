@@ -1,0 +1,30 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Fund J-Curve Analytics",
+  description:
+    "Private fund J-curve analytics built on real SEC Form D fund data, with Takahashi-Alexander, empirical benchmarking, Monte Carlo, and Marshall-Lerner cash-flow projections.",
+};
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+    >
+      <body className="min-h-full flex flex-col bg-neutral-950">{children}</body>
+    </html>
+  );
+}
