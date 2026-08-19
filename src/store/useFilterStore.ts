@@ -72,20 +72,26 @@ export const useFilterStore = create<FilterStore>((set, get) => ({
     let committedMin = Infinity;
     let committedMax = -Infinity;
     const managerTotals = new Map<string, number>();
-    const structures = new Set<string>();
-    const states = new Set<string>();
+    const structureCounts = new Map<string, number>();
+    const stateCounts = new Map<string, number>();
     for (const f of funds) {
       vintageMin = Math.min(vintageMin, f.vintageYear);
       vintageMax = Math.max(vintageMax, f.vintageYear);
       committedMin = Math.min(committedMin, f.committedCapital);
       committedMax = Math.max(committedMax, f.committedCapital);
       managerTotals.set(f.manager, (managerTotals.get(f.manager) ?? 0) + f.committedCapital);
-      structures.add(f.structure);
-      if (f.state) states.add(f.state);
+      structureCounts.set(f.structure, (structureCounts.get(f.structure) ?? 0) + 1);
+      if (f.state) stateCounts.set(f.state, (stateCounts.get(f.state) ?? 0) + 1);
     }
-    const managers = Array.from(managerTotals.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([m]) => m);
+    // Sort by frequency, not alphabetically -- state codes like "1Z"
+    // (Russia) or "2H" (Ukraine) sort before every US state alphabetically
+    // despite being a handful of filings out of tens of thousands, which
+    // put rare/tiny-count options ahead of the common ones in the dropdown.
+    const byCountDesc = (m: Map<string, number>) =>
+      Array.from(m.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([k]) => k);
+    const managers = byCountDesc(managerTotals);
     set({
       bounds: {
         vintageMin,
@@ -93,8 +99,8 @@ export const useFilterStore = create<FilterStore>((set, get) => ({
         committedMin,
         committedMax,
         managers,
-        structures: Array.from(structures).sort(),
-        states: Array.from(states).sort(),
+        structures: byCountDesc(structureCounts),
+        states: byCountDesc(stateCounts),
       },
       vintageMin,
       vintageMax,

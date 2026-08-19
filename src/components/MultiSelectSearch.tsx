@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useClickOutside } from "@/lib/useClickOutside";
 
 export function MultiSelectSearch({
   label,
@@ -21,7 +22,10 @@ export function MultiSelectSearch({
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const display = renderLabel ?? ((v: string) => v);
+
+  useClickOutside(containerRef, () => setOpen(false), open);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -33,7 +37,7 @@ export function MultiSelectSearch({
   }, [options, query]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <div className="flex items-center justify-between mb-1">
         <label className="text-xs font-medium text-neutral-400">{label}</label>
         {selected.length > 0 && (

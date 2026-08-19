@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Fund } from "@/lib/types";
 import { formatCurrencyCompact } from "@/lib/format";
+import { useClickOutside } from "@/lib/useClickOutside";
 
 export function FundPicker({
   funds,
@@ -17,6 +18,9 @@ export function FundPicker({
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(containerRef, () => setOpen(false), open);
 
   const byId = useMemo(() => new Map(funds.map((f) => [f.id, f])), [funds]);
   const selectedFunds = selectedIds.map((id) => byId.get(id)).filter((f): f is Fund => !!f);
@@ -35,7 +39,7 @@ export function FundPicker({
   }, [funds, query]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <div className="flex items-center justify-between mb-1">
         <label className="text-xs font-medium text-neutral-400">Fund (search &amp; select)</label>
         {selectedIds.length > 0 && (
