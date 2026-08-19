@@ -29,6 +29,25 @@ export function Disclosure() {
           browser session, which is why this required a browser-based extractor rather than the usual scripted pull.
         </p>
         <p>
+          <strong className="text-neutral-500">&quot;Filings,&quot; not a deduplicated fund count.</strong> The
+          fund count shown is Form D pooled-fund <em>offering filings</em> from 2020–2026, not a count of distinct
+          private funds — it is not directly comparable to SEC&apos;s own published{" "}
+          <a
+            href="https://www.sec.gov/data-research/statistics-data-visualizations/private-fund-statistics"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-neutral-400"
+          >
+            Private Fund Statistics
+          </a>{" "}
+          (54,392 funds at large advisers, Form PF, 2025Q3; ~108,752 funds across all RIA/ERA-advised funds, Form
+          ADV, most recent snapshot). Those are deduplicated snapshots of currently active funds; this dataset is a
+          filing-event count over a fixed window, where a single fund can file several Form Ds for parallel vehicles
+          (master, onshore/offshore feeders) and where Form D itself requires no SEC-registered adviser at all —
+          both push this count above a true distinct-fund total, while excluding funds with no new or amended
+          filing since 2020 pulls it back down.
+        </p>
+        <p>
           <strong className="text-neutral-500">No guarantee of accuracy.</strong> Data is provided &quot;as is&quot;
           from public SEC filings and may contain filer errors, omissions, or reporting anomalies (a small number of
           extreme outliers were excluded during cleaning — see{" "}
@@ -42,7 +61,7 @@ export function Disclosure() {
           user-set annual rate — not a real historical index feed (e.g. actual S&amp;P 500 daily returns). Treat
           them as an illustration of the comparison method, not a live benchmark.
         </p>
-        <p className="text-neutral-700">
+        <p className="lg:col-span-2 text-neutral-700">
           Not affiliated with, endorsed by, or a service of the U.S. Securities and Exchange Commission. Fund names
           and manager names are drawn from public regulatory filings and are shown for identification purposes only.
         </p>

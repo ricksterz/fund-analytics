@@ -84,7 +84,7 @@ export default function Home() {
                 "Loading fund data..."
               ) : (
                 <>
-                  {funds.length.toLocaleString()} funds loaded
+                  {funds.length.toLocaleString()} Form D filings loaded
                   <br />
                   Vintages {filters.bounds.vintageMin}–{filters.bounds.vintageMax}
                 </>
