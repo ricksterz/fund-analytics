@@ -116,6 +116,47 @@ def is_feeder(name: str) -> bool:
     return bool(FEEDER_RE.search(name))
 
 
+# Lettered parallel vehicles of the same fund ("Fund VI-A", "Fund VI-B", ...,
+# alongside the unlettered "Fund VI") are usually split out for tax/investor
+# reasons (US taxable / US tax-exempt / non-US sleeves) rather than being
+# separate pools of capital. When every letter in a family reports the
+# EXACT SAME committed-capital figure, that's the whole fund's target
+# repeated on each parallel filing, not $N x that amount raised -- verified:
+# "FRANCISCO PARTNERS VI, L.P." plus its -A/-B/-C/-D vehicles all report an
+# identical $6.6B target across 5 separate filings, not $33B. Only that
+# unambiguous case (identical amount across the whole family) is
+# consolidated; families where letters report genuinely DIFFERENT amounts
+# (e.g. Blue Owl Digital Infrastructure Fund III-A/B/C at
+# $2.6B/$1.9B/$1.5B, plausibly distinct sub-commitments) are left alone.
+SERIES_LETTER_RE = re.compile(r"^(.*?\b[IVXL]{1,6})-[A-Z]\b(.*)$", re.IGNORECASE)
+SERIES_LETTER_SUFFIX_RE = re.compile(r"-[A-Z]\b")
+
+
+def series_family_key(name: str) -> str:
+    m = SERIES_LETTER_RE.match(name)
+    if m:
+        return (m.group(1) + m.group(2)).strip().upper()
+    return name.strip().upper()
+
+
+def dedupe_series_families(funds: list[dict]) -> tuple[list[dict], int]:
+    families: dict[str, list[dict]] = {}
+    for f in funds:
+        families.setdefault(series_family_key(f["name"]), []).append(f)
+
+    deduped = []
+    dropped = 0
+    for members in families.values():
+        if len(members) == 1 or len({m["committedCapital"] for m in members}) > 1:
+            deduped.extend(members)
+            continue
+        unlettered = [m for m in members if not SERIES_LETTER_SUFFIX_RE.search(m["name"])]
+        keep = unlettered[0] if unlettered else sorted(members, key=lambda m: m["firstFilingDate"])[0]
+        deduped.append(keep)
+        dropped += len(members) - 1
+    return deduped, dropped
+
+
 HISTORY_DIR = Path(__file__).resolve().parent / "formd_history"
 
 # The browser-side extractor met two different FILING_DATE formats across
@@ -292,6 +333,8 @@ def main() -> None:
     feeder_count = sum(1 for f in funds if is_feeder(f["name"]))
     funds = [f for f in funds if not is_feeder(f["name"])]
 
+    funds, series_dupes_dropped = dedupe_series_families(funds)
+
     funds.sort(key=lambda f: f["committedCapital"], reverse=True)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -300,6 +343,7 @@ def main() -> None:
     print(f"Wrote {len(funds)} funds to {OUT_PATH} ({len(recent)} recent + {len(historical)} historical)")
     print(f"  dropped {cross_window_dupes} cross-window duplicate (pre-2025) filings")
     print(f"  dropped {feeder_count} feeder-fund filings")
+    print(f"  dropped {series_dupes_dropped} same-amount lettered-series duplicate filings")
     print("  fundType counts:", Counter(f["fundType"] for f in funds))
     print("  vintageYear counts:", dict(sorted(Counter(f["vintageYear"] for f in funds).items())))
     print(

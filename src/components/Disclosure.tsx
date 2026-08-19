@@ -39,6 +39,16 @@ export function Disclosure() {
           and $17.0B) — exact-name matches across that boundary now keep only the more recent entry.
         </p>
         <p>
+          <strong className="text-neutral-500">Lettered parallel vehicles consolidated.</strong> Funds are often
+          split into parallel vehicles by investor type — &quot;Fund VI&quot;, &quot;Fund VI-A&quot;,
+          &quot;Fund VI-B&quot; — each with its own Form D. When every letter in a family reports the exact same
+          committed-capital figure, that&apos;s the whole fund&apos;s target repeated on each filing, not that
+          amount raised several times over (verified: &quot;FRANCISCO PARTNERS VI, L.P.&quot; plus its -A/-B/-C/-D
+          vehicles all reported an identical $6.6B target across 5 separate filings — not $33B). Only that
+          unambiguous case is consolidated to one entry; families where letters report genuinely different amounts
+          (plausibly distinct sub-commitments) are left as-is.
+        </p>
+        <p>
           <strong className="text-neutral-500">&quot;Filings,&quot; not a deduplicated fund count.</strong> The
           fund count shown is Form D pooled-fund <em>offering filings</em> from 2020–2026, not a count of distinct
           private funds — it is not directly comparable to SEC&apos;s own published{" "}
@@ -52,11 +62,11 @@ export function Disclosure() {
           </a>{" "}
           (54,392 funds at large advisers, Form PF, 2025Q3; ~108,752 funds across all RIA/ERA-advised funds, Form
           ADV, most recent snapshot). Those are deduplicated snapshots of currently active funds; this dataset is a
-          filing-event count over a fixed window. Feeders and cross-window duplicates are removed (see above), but a
-          fund can still file separate Form Ds for genuinely parallel vehicles (e.g. onshore/offshore co-investment
-          funds with distinct investor bases), and Form D itself requires no SEC-registered adviser at all — both
-          still push this count above a true distinct-fund total, while excluding funds with no new or amended
-          filing since 2020 pulls it back down.
+          filing-event count over a fixed window. Feeders, cross-window duplicates, and same-amount lettered series
+          are removed (see above), but a fund can still file separate Form Ds for parallel vehicles that report
+          genuinely different amounts, and Form D itself requires no SEC-registered adviser at all — both still push
+          this count above a true distinct-fund total, while excluding funds with no new or amended filing since
+          2020 pulls it back down.
         </p>
         <p>
           <strong className="text-neutral-500">No guarantee of accuracy.</strong> Data is provided &quot;as is&quot;
@@ -72,7 +82,7 @@ export function Disclosure() {
           user-set annual rate — not a real historical index feed (e.g. actual S&amp;P 500 daily returns). Treat
           them as an illustration of the comparison method, not a live benchmark.
         </p>
-        <p className="text-neutral-700">
+        <p className="lg:col-span-2 text-neutral-700">
           Not affiliated with, endorsed by, or a service of the U.S. Securities and Exchange Commission. Fund names
           and manager names are drawn from public regulatory filings and are shown for identification purposes only.
         </p>
