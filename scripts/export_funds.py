@@ -103,6 +103,19 @@ def clean_committed_capital(offering_amt, sold_amt):
     return None, None
 
 
+# A feeder passes capital straight into a master fund rather than running
+# its own investment strategy -- its capital calls/distributions are a copy
+# of the master's, so counting both double-counts the same pool of capital
+# under two names. Verified against real filings: "Jetha Global Master
+# Fund" ($40M) plus its two feeders summed to ~$82M for what is one $40M
+# pool. Masters are kept; only feeders are dropped.
+FEEDER_RE = re.compile(r"\bfeeder\b", re.IGNORECASE)
+
+
+def is_feeder(name: str) -> bool:
+    return bool(FEEDER_RE.search(name))
+
+
 HISTORY_DIR = Path(__file__).resolve().parent / "formd_history"
 
 # The browser-side extractor met two different FILING_DATE formats across
@@ -260,13 +273,33 @@ def main() -> None:
     seen_ids = {f["id"] for f in recent}
     historical = [f for f in historical if f["id"] not in seen_ids]
 
+    # Cross-window duplicates: the 2020-2024 backfill only sees ORIGINAL
+    # filings, and the 2025-2026 pipeline can't resolve amendment chains
+    # past its own 6-quarter window -- so a fund that filed in, say, 2022
+    # and amended again in 2025 shows up once from each source, as if two
+    # different funds. Verified against real filings: "Graham Global
+    # Investment Fund II SPC Ltd" appears as $14.0B (2023) and $17.0B
+    # (2025) -- the same fund, not a coincidental name match (committed
+    # capital grows consistently with continued fundraising, and these are
+    # distinctive proper-noun fund names, not generic labels reused across
+    # unrelated funds). Keep the most recent, drop the older one.
+    recent_names = {f["name"] for f in recent}
+    cross_window_dupes = sum(1 for f in historical if f["name"] in recent_names)
+    historical = [f for f in historical if f["name"] not in recent_names]
+
     funds = recent + historical
+
+    feeder_count = sum(1 for f in funds if is_feeder(f["name"]))
+    funds = [f for f in funds if not is_feeder(f["name"])]
+
     funds.sort(key=lambda f: f["committedCapital"], reverse=True)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(funds, separators=(",", ":")))
 
     print(f"Wrote {len(funds)} funds to {OUT_PATH} ({len(recent)} recent + {len(historical)} historical)")
+    print(f"  dropped {cross_window_dupes} cross-window duplicate (pre-2025) filings")
+    print(f"  dropped {feeder_count} feeder-fund filings")
     print("  fundType counts:", Counter(f["fundType"] for f in funds))
     print("  vintageYear counts:", dict(sorted(Counter(f["vintageYear"] for f in funds).items())))
     print(

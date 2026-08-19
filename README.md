@@ -11,7 +11,7 @@ methodologies.
 ## What's real vs. modeled
 
 **Real, sourced from filings:** fund name, manager, fund type, vintage year,
-committed capital, entity structure, and domicile — pulled from 95,503 SEC
+committed capital, entity structure, and domicile — pulled from 87,553 SEC
 Form D pooled-fund offerings, vintages 2020–2026, via
 [`scripts/export_funds.py`](scripts/export_funds.py) from two sources:
 
@@ -27,6 +27,12 @@ Form D pooled-fund offerings, vintages 2020–2026, via
   original filing only (no cross-quarter amendment-chain resolution), and
   "indefinite offering" placeholder amounts are cleaned the same way as the
   2025–2026 source.
+
+Both sources are further deduplicated: feeder-named funds are dropped
+(their cash flows just mirror their master fund's, so counting both
+double-counts the same capital), and exact-name matches spanning the
+2024/2025 source boundary keep only the more recent entry (the same fund
+amending across that boundary previously counted as two).
 
 **Modeled, not historical:** Form D reports issuer-side offering amounts
 only — it has no capital-call, distribution, or NAV history for any fund.

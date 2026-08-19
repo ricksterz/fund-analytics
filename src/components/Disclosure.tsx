@@ -29,6 +29,16 @@ export function Disclosure() {
           browser session, which is why this required a browser-based extractor rather than the usual scripted pull.
         </p>
         <p>
+          <strong className="text-neutral-500">Feeder funds and cross-window duplicates removed.</strong> Feeder
+          funds pass capital straight into a master fund rather than running their own strategy, so a feeder&apos;s
+          cash flows are just a copy of its master&apos;s — counting both double-counts the same pool of capital
+          under two names (verified: &quot;Jetha Global Master Fund&quot; at $40M plus its two named feeders summed
+          to ~$82M for what is one $40M pool). Feeder-named filings are dropped; masters are kept. Separately, a
+          fund that filed in the 2020–2024 backfill and later amended in the 2025–2026 window previously appeared
+          twice, once from each source (verified: &quot;Graham Global Investment Fund II SPC Ltd&quot; at $14.0B
+          and $17.0B) — exact-name matches across that boundary now keep only the more recent entry.
+        </p>
+        <p>
           <strong className="text-neutral-500">&quot;Filings,&quot; not a deduplicated fund count.</strong> The
           fund count shown is Form D pooled-fund <em>offering filings</em> from 2020–2026, not a count of distinct
           private funds — it is not directly comparable to SEC&apos;s own published{" "}
@@ -42,9 +52,10 @@ export function Disclosure() {
           </a>{" "}
           (54,392 funds at large advisers, Form PF, 2025Q3; ~108,752 funds across all RIA/ERA-advised funds, Form
           ADV, most recent snapshot). Those are deduplicated snapshots of currently active funds; this dataset is a
-          filing-event count over a fixed window, where a single fund can file several Form Ds for parallel vehicles
-          (master, onshore/offshore feeders) and where Form D itself requires no SEC-registered adviser at all —
-          both push this count above a true distinct-fund total, while excluding funds with no new or amended
+          filing-event count over a fixed window. Feeders and cross-window duplicates are removed (see above), but a
+          fund can still file separate Form Ds for genuinely parallel vehicles (e.g. onshore/offshore co-investment
+          funds with distinct investor bases), and Form D itself requires no SEC-registered adviser at all — both
+          still push this count above a true distinct-fund total, while excluding funds with no new or amended
           filing since 2020 pulls it back down.
         </p>
         <p>
@@ -61,7 +72,7 @@ export function Disclosure() {
           user-set annual rate — not a real historical index feed (e.g. actual S&amp;P 500 daily returns). Treat
           them as an illustration of the comparison method, not a live benchmark.
         </p>
-        <p className="lg:col-span-2 text-neutral-700">
+        <p className="text-neutral-700">
           Not affiliated with, endorsed by, or a service of the U.S. Securities and Exchange Commission. Fund names
           and manager names are drawn from public regulatory filings and are shown for identification purposes only.
         </p>
