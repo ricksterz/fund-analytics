@@ -39,14 +39,16 @@ export function Disclosure() {
           and $17.0B) — exact-name matches across that boundary now keep only the more recent entry.
         </p>
         <p>
-          <strong className="text-neutral-500">Lettered parallel vehicles consolidated.</strong> Funds are often
-          split into parallel vehicles by investor type — &quot;Fund VI&quot;, &quot;Fund VI-A&quot;,
-          &quot;Fund VI-B&quot; — each with its own Form D. When every letter in a family reports the exact same
-          committed-capital figure, that&apos;s the whole fund&apos;s target repeated on each filing, not that
-          amount raised several times over (verified: &quot;FRANCISCO PARTNERS VI, L.P.&quot; plus its -A/-B/-C/-D
-          vehicles all reported an identical $6.6B target across 5 separate filings — not $33B). Only that
-          unambiguous case is consolidated to one entry; families where letters report genuinely different amounts
-          (plausibly distinct sub-commitments) are left as-is.
+          <strong className="text-neutral-500">Parallel vehicles consolidated.</strong> Funds are often split into
+          parallel vehicles by investor type or tax residency — &quot;Fund VI&quot; / &quot;Fund VI-A&quot; /
+          &quot;Fund VI-B&quot;, or &quot;Fund (Onshore)&quot; / &quot;Fund (Offshore)&quot; — each with its own Form
+          D. When every vehicle in a family reports the exact same committed-capital figure, that&apos;s the whole
+          fund&apos;s target repeated on each filing, not that amount raised several times over (verified:
+          &quot;FRANCISCO PARTNERS VI, L.P.&quot; plus its -A/-B/-C/-D vehicles all reported an identical $6.6B
+          target across 5 filings, not $33B; &quot;EagleTree Partners VI (Offshore), LP&quot; and its Onshore
+          counterpart both reported an identical $1.6B). Only that unambiguous case is consolidated to one entry;
+          families where vehicles report genuinely different amounts (e.g. D1 Capital Partners&apos; Onshore vehicle
+          at $7.2B vs. its Offshore vehicle at $4.5B — plausibly distinct, additive sub-commitments) are left as-is.
         </p>
         <p>
           <strong className="text-neutral-500">&quot;Filings,&quot; not a deduplicated fund count.</strong> The
@@ -62,11 +64,11 @@ export function Disclosure() {
           </a>{" "}
           (54,392 funds at large advisers, Form PF, 2025Q3; ~108,752 funds across all RIA/ERA-advised funds, Form
           ADV, most recent snapshot). Those are deduplicated snapshots of currently active funds; this dataset is a
-          filing-event count over a fixed window. Feeders, cross-window duplicates, and same-amount lettered series
-          are removed (see above), but a fund can still file separate Form Ds for parallel vehicles that report
-          genuinely different amounts, and Form D itself requires no SEC-registered adviser at all — both still push
-          this count above a true distinct-fund total, while excluding funds with no new or amended filing since
-          2020 pulls it back down.
+          filing-event count over a fixed window. Feeders, cross-window duplicates, and same-amount parallel
+          vehicles are removed (see above), but a fund can still file separate Form Ds for parallel vehicles that
+          report genuinely different amounts, and Form D itself requires no SEC-registered adviser at all — both
+          still push this count above a true distinct-fund total, while excluding funds with no new or amended
+          filing since 2020 pulls it back down.
         </p>
         <p>
           <strong className="text-neutral-500">No guarantee of accuracy.</strong> Data is provided &quot;as is&quot;

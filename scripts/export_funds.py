@@ -116,6 +116,37 @@ def is_feeder(name: str) -> bool:
     return bool(FEEDER_RE.search(name))
 
 
+def _normalize_family_key(s: str) -> str:
+    """Clean up whitespace/punctuation left dangling after stripping a
+    variant token out of a fund name, so e.g. 'Fund Onshore, LP' and
+    'Fund Offshore, LP' normalize to the same key as 'Fund, LP'."""
+    s = re.sub(r"\s+,", ",", s)
+    s = re.sub(r"\s{2,}", " ", s).strip()
+    return s.rstrip(".,").upper()
+
+
+def dedupe_identical_amount_families(funds, family_key_fn, prefer_fn=None):
+    """Consolidate funds into one entry per family_key_fn(name) group, but
+    ONLY when every member of the group reports the exact same committed
+    capital -- the unambiguous signal that they're reporting one overall
+    fund total on multiple parallel filings, not genuinely separate pools.
+    Families where members report different amounts are left untouched."""
+    families: dict[str, list[dict]] = {}
+    for f in funds:
+        families.setdefault(family_key_fn(f["name"]), []).append(f)
+
+    deduped = []
+    dropped = 0
+    for members in families.values():
+        if len(members) == 1 or len({m["committedCapital"] for m in members}) > 1:
+            deduped.extend(members)
+            continue
+        keep = prefer_fn(members) if prefer_fn else sorted(members, key=lambda m: m["firstFilingDate"])[0]
+        deduped.append(keep)
+        dropped += len(members) - 1
+    return deduped, dropped
+
+
 # Lettered parallel vehicles of the same fund ("Fund VI-A", "Fund VI-B", ...,
 # alongside the unlettered "Fund VI") are usually split out for tax/investor
 # reasons (US taxable / US tax-exempt / non-US sleeves) rather than being
@@ -134,27 +165,30 @@ SERIES_LETTER_SUFFIX_RE = re.compile(r"-[A-Z]\b")
 
 def series_family_key(name: str) -> str:
     m = SERIES_LETTER_RE.match(name)
-    if m:
-        return (m.group(1) + m.group(2)).strip().upper()
-    return name.strip().upper()
+    base = (m.group(1) + m.group(2)) if m else name
+    return _normalize_family_key(base)
 
 
-def dedupe_series_families(funds: list[dict]) -> tuple[list[dict], int]:
-    families: dict[str, list[dict]] = {}
-    for f in funds:
-        families.setdefault(series_family_key(f["name"]), []).append(f)
+def prefer_unlettered(members: list[dict]) -> dict:
+    unlettered = [m for m in members if not SERIES_LETTER_SUFFIX_RE.search(m["name"])]
+    return unlettered[0] if unlettered else sorted(members, key=lambda m: m["firstFilingDate"])[0]
 
-    deduped = []
-    dropped = 0
-    for members in families.values():
-        if len(members) == 1 or len({m["committedCapital"] for m in members}) > 1:
-            deduped.extend(members)
-            continue
-        unlettered = [m for m in members if not SERIES_LETTER_SUFFIX_RE.search(m["name"])]
-        keep = unlettered[0] if unlettered else sorted(members, key=lambda m: m["firstFilingDate"])[0]
-        deduped.append(keep)
-        dropped += len(members) - 1
-    return deduped, dropped
+
+# Onshore/offshore vehicles similarly split a fund by investor tax residency.
+# When a pair reports the EXACT SAME committed-capital figure, that's the
+# same overall target on both filings -- verified: "EagleTree Partners VI
+# (Offshore), LP" and "...VI (Onshore), LP" both report an identical $1.6B
+# target (5 pairs like this found: SOF-XIII VIP, WhiteHawk V-Plus, D1
+# Private Fund, Latin America Real Assets Capital, among others -- 50
+# families, 100 filings total). Where onshore/offshore report genuinely
+# DIFFERENT amounts (e.g. "D1 Capital Partners Onshore LP" $7.2B vs
+# "...Offshore LP" $4.5B -- distinct, additive investor-base pools), they're
+# left alone.
+REGION_RE = re.compile(r"\(?\s*(on-?shore|off-?shore)\s*\)?", re.IGNORECASE)
+
+
+def region_family_key(name: str) -> str:
+    return _normalize_family_key(REGION_RE.sub("", name))
 
 
 HISTORY_DIR = Path(__file__).resolve().parent / "formd_history"
@@ -333,7 +367,8 @@ def main() -> None:
     feeder_count = sum(1 for f in funds if is_feeder(f["name"]))
     funds = [f for f in funds if not is_feeder(f["name"])]
 
-    funds, series_dupes_dropped = dedupe_series_families(funds)
+    funds, series_dupes_dropped = dedupe_identical_amount_families(funds, series_family_key, prefer_unlettered)
+    funds, region_dupes_dropped = dedupe_identical_amount_families(funds, region_family_key)
 
     funds.sort(key=lambda f: f["committedCapital"], reverse=True)
 
@@ -344,6 +379,7 @@ def main() -> None:
     print(f"  dropped {cross_window_dupes} cross-window duplicate (pre-2025) filings")
     print(f"  dropped {feeder_count} feeder-fund filings")
     print(f"  dropped {series_dupes_dropped} same-amount lettered-series duplicate filings")
+    print(f"  dropped {region_dupes_dropped} same-amount onshore/offshore duplicate filings")
     print("  fundType counts:", Counter(f["fundType"] for f in funds))
     print("  vintageYear counts:", dict(sorted(Counter(f["vintageYear"] for f in funds).items())))
     print(

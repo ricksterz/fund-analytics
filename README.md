@@ -11,7 +11,7 @@ methodologies.
 ## What's real vs. modeled
 
 **Real, sourced from filings:** fund name, manager, fund type, vintage year,
-committed capital, entity structure, and domicile — pulled from 86,557 SEC
+committed capital, entity structure, and domicile — pulled from 86,503 SEC
 Form D pooled-fund offerings, vintages 2020–2026, via
 [`scripts/export_funds.py`](scripts/export_funds.py) from two sources:
 
@@ -35,11 +35,13 @@ Both sources are further deduplicated:
 - **Cross-window duplicates** — exact-name matches spanning the 2024/2025
   source boundary — keep only the more recent entry (the same fund amending
   across that boundary previously counted as two).
-- **Lettered parallel vehicles** ("Fund VI", "Fund VI-A", "Fund VI-B", ...)
-  are consolidated to one entry when every letter in the family reports the
+- **Parallel vehicles** — lettered ("Fund VI", "Fund VI-A", "Fund VI-B", ...)
+  or onshore/offshore ("Fund (Onshore)", "Fund (Offshore)") — are
+  consolidated to one entry when every vehicle in the family reports the
   *exact same* committed-capital figure — that's the whole fund's target
   repeated on each filing, not that amount raised several times over.
-  Families where letters report genuinely different amounts are left alone.
+  Families where vehicles report genuinely different amounts (plausibly
+  distinct, additive sub-commitments) are left alone.
 
 **Modeled, not historical:** Form D reports issuer-side offering amounts
 only — it has no capital-call, distribution, or NAV history for any fund.
