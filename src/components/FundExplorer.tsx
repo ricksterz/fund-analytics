@@ -9,6 +9,29 @@ import { placeLabel } from "@/lib/placeCodes";
 const INITIAL_ROWS = 15;
 const ROW_INCREMENT = 25;
 
+function FundCard({ f }: { f: Fund }) {
+  return (
+    <div className="rounded-md border border-neutral-800/60 bg-neutral-950/40 p-2.5">
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-sm text-neutral-200 leading-snug">{f.name}</span>
+        <span className="text-sm tabular-nums text-neutral-200 whitespace-nowrap shrink-0">
+          {formatCurrencyCompact(f.committedCapital)}
+        </span>
+      </div>
+      <div className="text-xs text-neutral-500 mt-0.5">{f.manager}</div>
+      <div className="flex flex-wrap gap-x-2.5 gap-y-0.5 mt-1.5 text-[11px] text-neutral-500">
+        <span>{f.fundType.replace(" Fund", "")}</span>
+        <span>·</span>
+        <span>{termForType(f.fundType)}y term</span>
+        <span>·</span>
+        <span>{f.structure}</span>
+        <span>·</span>
+        <span>{placeLabel(f.state)}</span>
+      </div>
+    </div>
+  );
+}
+
 function VintageGroup({
   year,
   funds,
@@ -39,7 +62,13 @@ function VintageGroup({
         <span className="text-xs text-neutral-400 tabular-nums">{formatCurrencyCompact(total)} committed</span>
       </button>
       {open && (
-        <div className="overflow-x-auto">
+        <div>
+          <div className="sm:hidden flex flex-col gap-2 p-3">
+            {rows.map((f) => (
+              <FundCard key={f.id} f={f} />
+            ))}
+          </div>
+          <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-neutral-950 text-neutral-500 text-xs uppercase tracking-wide">
@@ -75,6 +104,7 @@ function VintageGroup({
               ))}
             </tbody>
           </table>
+          </div>
           {visible < sorted.length && (
             <div className="px-3 py-2">
               <button
