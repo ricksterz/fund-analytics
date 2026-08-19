@@ -2,10 +2,26 @@
 
 import { PortfolioMetrics } from "@/lib/types";
 import { formatCurrencyCompact, formatMultiple, formatPercent } from "@/lib/format";
+import clsx from "clsx";
 
-function Card({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Card({
+  label,
+  value,
+  sub,
+  wide,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  wide?: boolean;
+}) {
   return (
-    <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-3 flex flex-col gap-1">
+    <div
+      className={clsx(
+        "rounded-lg border border-neutral-800 bg-neutral-900 p-3 flex flex-col gap-1",
+        wide && "col-span-2 sm:col-span-1"
+      )}
+    >
       <div className="text-[11px] uppercase tracking-wide text-neutral-500">{label}</div>
       <div className="text-xl font-semibold text-neutral-100 tabular-nums">{value}</div>
       {sub && <div className="text-xs text-neutral-500">{sub}</div>}
@@ -14,8 +30,11 @@ function Card({ label, value, sub }: { label: string; value: string; sub?: strin
 }
 
 export function MetricsGrid({ metrics }: { metrics: PortfolioMetrics }) {
+  // 9 cards -- doesn't divide evenly into 2 (mobile) or 5 (desktop) columns,
+  // so we stop at 3 columns (9/3 is exact) and let the last card span the
+  // full row on mobile instead of leaving an empty trailing cell.
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
       <Card label="Committed Capital" value={formatCurrencyCompact(metrics.committedCapital)} sub={`${metrics.fundCount.toLocaleString()} funds`} />
       <Card
         label="Capital Called"
@@ -40,6 +59,7 @@ export function MetricsGrid({ metrics }: { metrics: PortfolioMetrics }) {
         label={`Yr ${metrics.yr10Year} Distribution Range`}
         value={`${formatCurrencyCompact(metrics.yr10DistributionLow)} - ${formatCurrencyCompact(metrics.yr10DistributionHigh)}`}
         sub="P10 - P90 cumulative"
+        wide
       />
     </div>
   );

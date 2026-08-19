@@ -31,7 +31,9 @@ export function RelativePerformance({ pme }: { pme: PMEResult }) {
           <span>%/yr</span>
         </label>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+      {/* Only ever 2 cards -- no wider column count, or desktop leaves two
+          empty trailing cells instead of two appropriately wide ones. */}
+      <div className="grid grid-cols-2 gap-2 max-w-2xl">
         <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-3 flex flex-col gap-1">
           <div className="text-[11px] uppercase tracking-wide text-neutral-500">PME (Kaplan-Schoar)</div>
           <div className="text-xl font-semibold text-neutral-100 tabular-nums">{formatMultiple(pme.ksPme)}</div>

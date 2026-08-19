@@ -173,14 +173,15 @@ export function FilterBar() {
           </div>
         </div>
 
-        <div className="flex items-end">
-          <button
-            onClick={s.reset}
-            className="text-xs rounded-md border border-neutral-700 px-3 py-1.5 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"
-          >
-            Reset filters
-          </button>
-        </div>
+      </div>
+
+      <div className="mt-3 flex justify-end">
+        <button
+          onClick={s.reset}
+          className="text-xs rounded-md border border-neutral-700 px-3 py-1.5 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"
+        >
+          Reset filters
+        </button>
       </div>
     </div>
   );

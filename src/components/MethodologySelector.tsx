@@ -53,7 +53,10 @@ export function MethodologySelector() {
         <button
           onClick={togglePME}
           className={clsx(
-            "text-left rounded-lg border p-3 transition-colors",
+            // 5 tiles don't divide evenly into the 2-column tablet grid --
+            // span both columns there instead of leaving an empty cell
+            // dangling next to the last tile.
+            "text-left rounded-lg border p-3 transition-colors sm:col-span-2 lg:col-span-1",
             showPME
               ? "border-amber-400 bg-amber-400/10 ring-1 ring-amber-400/40"
               : "border-neutral-800 bg-neutral-900 hover:border-neutral-700"

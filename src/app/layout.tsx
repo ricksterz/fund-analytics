@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,6 +12,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// A soft, flowing display serif for the wordmark and tagline -- picked for
+// its literal curves, echoing the app's own J-curve.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  style: ["italic", "normal"],
+  weight: ["400", "500", "600"],
+});
+
 export const metadata: Metadata = {
   title: "Vantage Curve",
   description:
@@ -22,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-neutral-950">{children}</body>
     </html>

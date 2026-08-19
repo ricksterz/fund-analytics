@@ -14,6 +14,7 @@ import { FundExplorer } from "@/components/FundExplorer";
 import { ShareButton } from "@/components/ShareButton";
 import { RelativePerformance } from "@/components/RelativePerformance";
 import { Disclosure } from "@/components/Disclosure";
+import { JCurveIcon } from "@/components/JCurveIcon";
 import { METHODOLOGIES } from "@/lib/types";
 import { formatCurrencyCompact } from "@/lib/format";
 
@@ -70,12 +71,17 @@ export default function Home() {
       <header className="border-b border-neutral-800 bg-neutral-950 sticky top-0 z-30">
         <div className="mx-auto max-w-[1400px] px-4 py-3 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">
-              Vantage Curve
-            </h1>
-            <p className="text-xs text-neutral-500">
-              Every vintage. Every curve. One vantage point. · Real fund identity from the SEC Form D pipeline,
-              modeled capital-call &amp; NAV projections
+            <div className="flex items-center gap-2">
+              <JCurveIcon className="h-7 w-7 sm:h-8 sm:w-8 text-teal-400 shrink-0" />
+              <h1 className="font-display italic font-medium text-2xl sm:text-3xl tracking-tight text-neutral-50">
+                Vantage Curve
+              </h1>
+            </div>
+            <p className="font-display italic text-sm sm:text-base text-teal-300/80 mt-0.5">
+              Every vintage. Every curve. One vantage point.
+            </p>
+            <p className="text-[11px] text-neutral-600 mt-0.5">
+              Real fund identity from the SEC Form D pipeline, modeled capital-call &amp; NAV projections
             </p>
           </div>
           <div className="flex items-center gap-3">
