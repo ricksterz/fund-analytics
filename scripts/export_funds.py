@@ -191,6 +191,51 @@ def region_family_key(name: str) -> str:
     return _normalize_family_key(REGION_RE.sub("", name))
 
 
+# The cross-window check above only catches a fund appearing once from each
+# SOURCE (2020-2024 backfill vs. 2025-2026 pipeline). It misses a fund
+# refiling a fresh Form D -- rather than an amendment -- for what's really
+# the same offering, which can happen WITHIN either source: a filer
+# resubmitting years later (2020-2024 backfill has no amendment tracking,
+# so a genuine refiling looks like a brand new original), or two separate
+# amendment chains in the 2025-2026 pipeline that were never linked by
+# PREVIOUSACCESSIONNUMBER. Verified against real filings: "NORTH GULF
+# ENERGY CORPORATION, INC" filed an identical $9.0B offering in both 2021
+# and 2023 under different accession numbers; "NATIONWIDE BOLI PRIVATE
+# PLACEMENT VARIABLE ACCOUNT" filed an identical $5.95B offering twice in
+# 2025 alone. Exact name + exact committed-capital matches anywhere in the
+# combined dataset are consolidated to the most recent filing; matches with
+# DIFFERENT amounts are left alone (that's real fundraising growth, not a
+# duplicate -- e.g. the Graham Global Investment Fund II case above).
+#
+# This can't reuse dedupe_identical_amount_families' "whole family must
+# agree" safety check: some issuers (program sponsors, insurance separate
+# accounts) file MANY genuinely distinct offerings under the identical
+# name -- one real filer here has 11 same-named filings at 11 mostly
+# different amounts, so requiring the whole name-group to share one amount
+# would (correctly) refuse to touch it, but would also hide the one pair
+# inside it that IS an exact duplicate. Grouping by (name, amount) as a
+# single key instead only ever merges an exact pairwise match, regardless
+# of how many other distinct-amount filings that name also has.
+def prefer_most_recent(members: list[dict]) -> dict:
+    return sorted(members, key=lambda m: m["lastFilingDate"], reverse=True)[0]
+
+
+def dedupe_exact_duplicates(funds: list[dict]) -> tuple[list[dict], int]:
+    groups: dict[tuple, list[dict]] = {}
+    for f in funds:
+        groups.setdefault((_normalize_family_key(f["name"]), f["committedCapital"]), []).append(f)
+
+    deduped = []
+    dropped = 0
+    for members in groups.values():
+        if len(members) == 1:
+            deduped.append(members[0])
+            continue
+        deduped.append(prefer_most_recent(members))
+        dropped += len(members) - 1
+    return deduped, dropped
+
+
 HISTORY_DIR = Path(__file__).resolve().parent / "formd_history"
 
 # The browser-side extractor met two different FILING_DATE formats across
@@ -369,6 +414,7 @@ def main() -> None:
 
     funds, series_dupes_dropped = dedupe_identical_amount_families(funds, series_family_key, prefer_unlettered)
     funds, region_dupes_dropped = dedupe_identical_amount_families(funds, region_family_key)
+    funds, exact_dupes_dropped = dedupe_exact_duplicates(funds)
 
     funds.sort(key=lambda f: f["committedCapital"], reverse=True)
 
@@ -380,6 +426,7 @@ def main() -> None:
     print(f"  dropped {feeder_count} feeder-fund filings")
     print(f"  dropped {series_dupes_dropped} same-amount lettered-series duplicate filings")
     print(f"  dropped {region_dupes_dropped} same-amount onshore/offshore duplicate filings")
+    print(f"  dropped {exact_dupes_dropped} other exact-name same-amount duplicate filings")
     print("  fundType counts:", Counter(f["fundType"] for f in funds))
     print("  vintageYear counts:", dict(sorted(Counter(f["vintageYear"] for f in funds).items())))
     print(

@@ -22,7 +22,7 @@ export function ShareButton({ selectedFunds }: { selectedFunds: Fund[] }) {
   const [copied, setCopied] = useState(false);
 
   const buildUrl = () => {
-    const params = filtersToSearchParams(filters);
+    const params = filtersToSearchParams(filters, filters.bounds);
     const url = new URL(window.location.href);
     url.search = params.toString();
     return url.toString();

@@ -45,7 +45,7 @@ export default function Home() {
   // a valid share link, without polluting browser history.
   useEffect(() => {
     if (!hydratedFromUrl.current) return;
-    const params = filtersToSearchParams(filters);
+    const params = filtersToSearchParams(filters, filters.bounds);
     const next = `${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", next);
   }, [filters]);
@@ -104,7 +104,7 @@ export default function Home() {
       <main className="mx-auto max-w-[1400px] px-4 py-5 flex flex-col gap-5">
         {loading ? (
           <div className="flex items-center justify-center py-32 text-neutral-500 text-sm">
-            Loading fund dataset (~37K funds)...
+            Loading fund dataset (~86K funds)...
           </div>
         ) : (
           <>

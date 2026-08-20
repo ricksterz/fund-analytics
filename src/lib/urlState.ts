@@ -26,9 +26,24 @@ function decodeRange(str: string | null): [number, number] | null {
   return [lo, hi];
 }
 
+interface RangeBounds {
+  vintageMin: number;
+  vintageMax: number;
+  committedMin: number;
+  committedMax: number;
+}
+
+const DEFAULT_TERM_MIN = 0;
+const DEFAULT_TERM_MAX = 10;
+
 /** Serializes the parts of filter state worth putting in a shareable link.
- * `bounds` isn't included -- it's re-derived from the loaded dataset. */
-export function filtersToSearchParams(filters: FilterState): URLSearchParams {
+ * Range filters (vintage, committed capital, term) are only included when
+ * narrowed from their full bounds -- omitting them at default keeps a
+ * single-fund share link down to just `?f=<id>` instead of also carrying
+ * every range at its wide-open default (e.g. `&vy=2020-2026&cc=0-50000000000
+ * &tm=0-10`), which conveys nothing since a shared link's whole point is
+ * the specific fund/methodology/filters someone actually chose. */
+export function filtersToSearchParams(filters: FilterState, bounds?: RangeBounds): URLSearchParams {
   const p = new URLSearchParams();
   if (filters.methodology !== "takahashi-alexander") p.set("m", filters.methodology);
   if (!filters.showPME) p.set("pme", "0");
@@ -39,9 +54,21 @@ export function filtersToSearchParams(filters: FilterState): URLSearchParams {
   if (filters.fundTypes.length) p.set("ft", encodeList(filters.fundTypes));
   if (filters.structures.length) p.set("st", encodeList(filters.structures));
   if (filters.states.length) p.set("loc", encodeList(filters.states));
-  p.set("vy", `${filters.vintageMin}-${filters.vintageMax}`);
-  p.set("cc", `${Math.round(filters.committedMin)}-${Math.round(filters.committedMax)}`);
-  p.set("tm", `${filters.termMin}-${filters.termMax}`);
+
+  const vintageNarrowed =
+    !bounds || filters.vintageMin !== bounds.vintageMin || filters.vintageMax !== bounds.vintageMax;
+  if (vintageNarrowed) p.set("vy", `${filters.vintageMin}-${filters.vintageMax}`);
+
+  const committedNarrowed =
+    !bounds || filters.committedMin !== bounds.committedMin || filters.committedMax !== bounds.committedMax;
+  if (committedNarrowed) {
+    p.set("cc", `${Math.round(filters.committedMin)}-${Math.round(filters.committedMax)}`);
+  }
+
+  if (filters.termMin !== DEFAULT_TERM_MIN || filters.termMax !== DEFAULT_TERM_MAX) {
+    p.set("tm", `${filters.termMin}-${filters.termMax}`);
+  }
+
   return p;
 }
 

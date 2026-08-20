@@ -51,7 +51,7 @@ export function FundPicker({
       <input
         type="text"
         value={query}
-        placeholder="Type a fund or manager name to search 37K+ funds..."
+        placeholder="Type a fund or manager name to search 86K+ funds..."
         onFocus={() => setOpen(true)}
         onChange={(e) => {
           setQuery(e.target.value);

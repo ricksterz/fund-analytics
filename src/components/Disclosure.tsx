@@ -28,12 +28,13 @@ export function Disclosure() {
         <p>
           <strong className="text-neutral-500">Duplicate filings removed.</strong> The same fund is often
           represented by more than one SEC filing — a feeder vehicle alongside its master fund, parallel share
-          classes (&quot;Fund VI&quot;, &quot;Fund VI-A&quot;, &quot;Fund VI-B&quot;), or onshore/offshore twins —
-          each reporting the same committed capital under a different name. Counting every one of those separately
-          would overstate total capital and fund count. Where that pattern is unambiguous (the same dollar figure
-          repeated across clearly related filings), only one representative filing is counted. Cases with genuinely
-          different amounts across related filings are left as separate entries, since those plausibly represent
-          real, distinct pools of capital rather than one total counted twice.
+          classes (&quot;Fund VI&quot;, &quot;Fund VI-A&quot;, &quot;Fund VI-B&quot;), onshore/offshore twins, or
+          simply the same offering refiled from scratch rather than amended — each reporting the same committed
+          capital under a matching or near-matching name. Counting every one of those separately would overstate
+          total capital and fund count. Where that pattern is unambiguous (the same dollar figure repeated across
+          clearly related filings), only one representative filing is counted. Cases with genuinely different
+          amounts across related filings are left as separate entries, since those plausibly represent real,
+          distinct pools of capital rather than one total counted twice.
         </p>
         <p>
           <strong className="text-neutral-500">&quot;Filings,&quot; not a deduplicated fund count.</strong> The
@@ -69,18 +70,6 @@ export function Disclosure() {
         <p className="text-neutral-700">
           Not affiliated with, endorsed by, or a service of the U.S. Securities and Exchange Commission. Fund names
           and manager names are drawn from public regulatory filings and are shown for identification purposes only.
-        </p>
-        <p className="lg:col-span-2 text-neutral-700">
-          Full data pipeline and cleaning methodology are open source on{" "}
-          <a
-            href="https://github.com/ricksterz/fund-analytics"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-neutral-400"
-          >
-            GitHub
-          </a>
-          .
         </p>
       </div>
     </footer>

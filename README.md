@@ -11,7 +11,7 @@ methodologies.
 ## What's real vs. modeled
 
 **Real, sourced from filings:** fund name, manager, fund type, vintage year,
-committed capital, entity structure, and domicile — pulled from 86,503 SEC
+committed capital, entity structure, and domicile — pulled from 86,421 SEC
 Form D pooled-fund offerings, vintages 2020–2026, via
 [`scripts/export_funds.py`](scripts/export_funds.py) from two sources:
 
@@ -42,6 +42,13 @@ Both sources are further deduplicated:
   repeated on each filing, not that amount raised several times over.
   Families where vehicles report genuinely different amounts (plausibly
   distinct, additive sub-commitments) are left alone.
+- **Exact re-filings** — same normalized name *and* identical committed
+  capital, anywhere in the dataset — are consolidated to the most recent
+  filing. Unlike the parallel-vehicle case above, this can't require the
+  whole name-group to agree: some issuers (program sponsors, insurance
+  separate accounts) file many genuinely distinct offerings under an
+  identical name, so it groups by the `(name, amount)` pair directly and
+  only ever merges an exact pairwise match.
 
 **Modeled, not historical:** Form D reports issuer-side offering amounts
 only — it has no capital-call, distribution, or NAV history for any fund.
