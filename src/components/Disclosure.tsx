@@ -55,6 +55,19 @@ export function Disclosure() {
           number and SEC&apos;s will never match exactly.
         </p>
         <p>
+          <strong className="text-neutral-500">Some vintages skew large from long-running funds.</strong> When a
+          fund&apos;s exact target size isn&apos;t stated, this dataset falls back to the cumulative amount a fund
+          has ever raised, as reported on its most recent SEC filing. For a fund that opened and closed within the
+          window this covers, that&apos;s a reasonable stand-in for committed capital. For an open-ended fund
+          that&apos;s been continuously raising capital for years or decades — a well-known hedge fund, for
+          instance — that same field reflects its <em>entire operating history</em>, not new capital formed in the
+          year it happens to be grouped under here. That&apos;s why vintage 2025 shows a disproportionately large
+          total: it&apos;s where several decades-old, very large funds&apos; most recent filings happened to land.
+          There&apos;s no reliable way to tell &quot;genuinely new large fund&quot; apart from &quot;long-running
+          fund&apos;s lifetime total&quot; from this data alone, so figures are shown as reported rather than
+          adjusted by guesswork.
+        </p>
+        <p>
           <strong className="text-neutral-500">No guarantee of accuracy.</strong> Data is provided &quot;as is&quot;
           from public SEC filings and may contain filer errors, omissions, or reporting anomalies — a small number
           of implausible outlier values were excluded. Modeled projections rely on simplified assumptions and
@@ -67,7 +80,7 @@ export function Disclosure() {
           user-set annual rate — not a real historical index feed (e.g. actual S&amp;P 500 daily returns). Treat
           them as an illustration of the comparison method, not a live benchmark.
         </p>
-        <p className="text-neutral-700">
+        <p className="lg:col-span-2 text-neutral-700">
           Not affiliated with, endorsed by, or a service of the U.S. Securities and Exchange Commission. Fund names
           and manager names are drawn from public regulatory filings and are shown for identification purposes only.
         </p>

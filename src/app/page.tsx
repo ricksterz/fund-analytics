@@ -109,7 +109,7 @@ export default function Home() {
         ) : (
           <>
             {selectedFunds.length > 0 && (
-              <div className="rounded-lg border border-teal-400/40 bg-teal-400/5 p-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="rounded-lg border border-teal-400/40 bg-teal-400/5 p-3">
                 <div className="text-sm text-teal-200">
                   Now analyzing{" "}
                   <strong>
@@ -125,7 +125,6 @@ export default function Home() {
                     </span>
                   )}
                 </div>
-                <ShareButton selectedFunds={selectedFunds} />
               </div>
             )}
 
